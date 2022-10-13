@@ -1,0 +1,71 @@
+APPROACH-1 (Simple Sol - DFS)
+
+Time - O(E + V) 
+Space - O(V)
+
+Idea:
+
+1. Iterate all nodes & call dfs for each node
+2. Within dfs mark all connected connected components as visited recursively
+3. Initially while iterating - call dfs only if node is not visited & iterate counter whenever dfs is called for each component (i.e. each unvisited node)
+
+---------------------------
+
+APPROACH-2 (Union and Find)
+
+Time - O(E + V) 
+Space - O(V)
+
+Idea:
+
+1. UNION: Make union of each conneted comoponent i.e. represent all nodes of a connected component by their common (parent) root node
+2. FIND: Find root parent of a particular node i.e. find earlier represented common (parent) root node of connected component | At last - all nodes within 
+   a connected components will find same parent
+
+Implementation:
+
+1. Create an array 'Parent' where we will store root parent for each node and its index will represent the node <ONLY WHERE NODES VALUES ARE 0,1,2...>
+2. Create an array 'size' where we will store size of connected component 
+3. Initially we will set no of connected components count to total no of nodes --as and when we will connect two nodes we will reduce no of connected 
+   components by 1
+3. Iterate edge list and call union() func for each edge pair - In union func:
+    a. First current find root parent of both nodes --using func 'find()' --(from array 'Parent')
+    b. If both nodes has already same parent then we havent connected two nodes and thus no need to decrement connected component counter for this itr
+    c. But if both nodes have different parernt nodes - make their parent same (idicating they belong to same component) --(litte optimization: use 'size'
+       array to connect smaller component to larger one)
+       
+       
+------------------------------
+            CODE
+------------------------------
+
+        
+def countComponents (self, n: int, edges: List[List[int]]) -> int:
+  
+  par = [i for i in range(n)]
+  rank = [1] * n
+  
+  def find(n1):
+    res = n1
+    while res != par[res]:
+    par[res] = par [par[res]]
+    res = par[res]
+  return res
+  
+  def union(n1, n2):
+    p1, p2 = find(n1), find(n2)
+    if p1 == p2:
+      return 0
+    if rank[p2] > rank[p1]:
+      par [p1] = p2
+      rank[p2] += rank[p1]
+    else:
+      par [p2] = p1
+      rank[p1] += rank[p2]
+    return 1
+    
+  res = n
+  for n1, n2 in edges:
+    res -= union(n1, n2)
+  
+  return res
