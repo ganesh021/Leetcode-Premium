@@ -1,0 +1,86 @@
+
+Time - O(C)   --where: C is total no of unique characters in given dict
+Space - O(C)
+
+-----------------------------
+IDEA:
+
+1. Construct a graph for given list of words 
+    - Iterate and compare two consecutive words & accordingly create graph nodes pairs | represeneting which char comes before which char
+    - If 2 consecutive words starts with same char - look for next chars until both chars are different - then char from first word (key) will always come 
+      before corresponding char of second word (value)
+2. Topological sort on constructed graph
+    - topological sort (which is basically postorder dfs) on adj list | TO: (a) get nodes in correct reverse order & (b) to get same result inspite of not
+      passing root node initially at start of dfs (i.e. carrying out dfs on all nodes in random order) 
+    - If here we use normal dfs - consider edges (a:b), (b:c), (a:c) - normal dfs starting from 'a' will give a->b->c or a->c->b (& a-c-b will be wrong)
+      | also | if instead of 'a' we started dfs initially from 'b' or 'c' then also it would not give a->b->c
+    - However if we use topological sort (postorder dfs) - it will give always give c->b->a for both above cases | and we can simply reverse the result
+
+----------------------------
+IMPLEMENTATION:
+
+1. Initialize an empty hashmap (for adjacency list) of unique chars within dict
+2. Construct a graph nodes (pair by pair) for given list of words
+3. Maintian two sets 'visited' and 'path' & perform topological sort
+4. Visited: to mark processed nodes visited at last - to avoid processing it again
+5. Path: to check for cycle - visited and path set is seperate -> to detect cycle in the current path only
+6. Finally reverse and return the result
+
+
+-------------
+    CODE
+-------------
+
+
+class Solution:
+    """
+    @param words: a list of words
+    @return: a string which is correct order
+    """
+    def alien_order(self, words: List[str]) -> str:
+
+        # initialize an empty hashmap for all unique chars within dict (for adjacency list)
+        adjList = { c : set() for w in words for c in w }
+
+        # setup graph based on given dictionary
+        for i in range(len(words) - 1):
+            w1, w2 = words[i], words[i + 1]
+            minLen = min(len(w1), len(w2))
+            # check for invalid order within dictionary
+            if len(w1) > len(w2) and w1[:minLen] == w2[:minLen]:
+                return ""
+            # create graph node pairs by compareing two words
+            for j in range(minLen):
+                if w1[j] != w2[j]:
+                    adjList[w1[j]].add(w2[j])
+                    break
+
+        res = []
+        visited = set()
+        path = set()    # to detect cycle
+
+        # topological sort (Postorder dfs) - to get nodes in correct reverse order &
+        # getting res inspite of not passing root node initially
+        def dfs(node):
+            if node in path:
+                return True     # cycle detected
+            if node in visited:
+                return False
+            path.add(node)
+            for nbr in adjList[node]:
+                if dfs(nbr):
+                    return True 
+            res.append(node)
+            visited.add(node)
+            path.remove(node)
+            return False
+
+        # due to topologocal sort it wont matter whether we start iterating from root node or some interminary node
+        for n in adjList:
+            if dfs(n):
+                return ""
+        res.reverse()           # reverse the response array before returning
+        return "".join(res)     # convert to string
+        
+        
+
