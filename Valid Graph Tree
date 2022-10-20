@@ -1,0 +1,55 @@
+
+Time: O(e + v)
+Space: O(v)
+
+IDEA:
+
+1. For a vaild tree: 
+    A. There should be no cycle 
+    B. There should be no disconnected components
+
+
+IMPL:
+
+1. From edge list create adj list - connect each pair from both dir i.e. A:[B] and B:[A]
+2. Rec dfs - maintain visited to check for cycle
+3. Maintain prev node during next itr to avoid processing prev node again & marking cycle with it
+4. Finally return true only if visited count is equal to total no of nodes given i.e. no disconnected components
+
+
+-------------
+    CODE
+-------------
+
+class Solution:
+    """
+    @param n: An integer
+    @param edges: a list of undirected edges
+    @return: true if it's a valid tree, or false
+    """
+
+    def validTree(self, n, edges):
+        if not n:
+            return True
+        adj = {i: [] for i in range(n)}
+        for n1, n2 in edges:
+            adj[n1].append(n2)
+            adj[n2].append(n1)
+
+        visit = set()
+
+        def dfs(i, prev):
+            if i in visit:
+                return False
+
+            visit.add(i)
+            for j in adj[i]:
+                if j == prev:
+                    continue
+                if not dfs(j, i):
+                    return False
+            return True
+
+        return dfs(0, -1) and n == len(visit)
+        
+        
